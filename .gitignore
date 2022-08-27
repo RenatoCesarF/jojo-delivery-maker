@@ -1,2 +1,10 @@
 ./assinatura.png
 assinatura.png
+
+
+*/__pycache__/*
+./__pycache__/
+
+./input/prints/
+./input/assinatura.png
+input/assinatura copy.png

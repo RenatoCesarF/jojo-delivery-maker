@@ -6,4 +6,4 @@ def get_all_files(directory: str, types: list) -> list:
         for file in Path(directory).glob(f"**/*.{f_type}"):
             files.append(file)
     
-    return files
+    return sorted(files)

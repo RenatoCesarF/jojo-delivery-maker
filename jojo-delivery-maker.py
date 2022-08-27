@@ -7,15 +7,18 @@ from utils.get_all_files import get_all_files
 from utils.zip_files import zip_files
 
 argumentList = argv[1:]
-FOLDER_TO_SEARCH_CODE = argumentList[0]
-SIGNATURE_PATH = argumentList[1]
+FOLDER_TO_SEARCH_CODE = argumentList[0] or "./input/src"
+SIGNATURE_PATH = argumentList[1] or "./input/assinatura.png"
+EXIT_PRINT_FOLDER =  "./input/prints"
 
 STUDENT_NAME = "Renato Cesar Ferreira Barcellos"
 LIST_NAME = "Entrega 2"
 HEADER_NAME = f"Linguagem de Programação II - {LIST_NAME} - {STUDENT_NAME}"
+
 HEIGHT = 7
 WIDTH = 40
-ALIGN = "P"
+ALIGN = "L"
+ORIENTATION = "P"
 
 
 class PdfMaker(FPDF):
@@ -28,7 +31,8 @@ class PdfMaker(FPDF):
         self.image(path, 
                    w=img.width * resize_factor, 
                    h=img.height * resize_factor,
-                   type = 'PNG', link = '')
+                   link = ''
+        )
         
     def create_footer(self):
         self.set_font('Arial', 'B', 13)
@@ -39,13 +43,13 @@ class PdfMaker(FPDF):
         
     def create_header(self, text):
         self.set_font('Arial', 'B', 14)
-        self.ln(3)
         self.set_fill_color(255, 255, 255)
-        self.cell(0, 10, text, 0, 1, 'C', 1)
-        self.ln(7)
+        self.new_line(text)
+
         
-    def new_line(self):
-        self.cell(WIDTH, HEIGHT, f"", align=ALIGN, ln=True)
+    def new_line(self, text: str = ""):
+        self.cell(WIDTH, HEIGHT, text, align=ALIGN, ln=True)
+
 
 class SaidaPDF(PdfMaker):
     def add_print(self, path):
@@ -55,13 +59,13 @@ class SaidaPDF(PdfMaker):
         
     @staticmethod
     def build():
-        saida = SaidaPDF(orientation=ALIGN, unit='mm', format='A4')
+        saida = SaidaPDF(orientation=ORIENTATION, unit='mm', format='A4')
         saida.alias_nb_pages()
         saida.add_page()
         saida.create_header(HEADER_NAME)
         saida.new_line()  
 
-        for file in get_all_files('./prints', ['png']):
+        for file in get_all_files(EXIT_PRINT_FOLDER, ['png']):
             print(file)
             saida.add_print(file)
             
@@ -75,12 +79,10 @@ class FontesPDF(PdfMaker):
         self.create_title(title)
         self.add_lines_from_file(file_path)
                
-    def create_title(self, label):
+    def create_title(self, text):
         self.set_font('Arial', 'B', 15)
-        self.ln(5)
         self.set_fill_color(255, 255, 255)
-        self.cell(0, 10, label, 0, 1, 'L', 1)
-        self.ln(3)
+        self.new_line(text)
        
     def add_lines_from_file(self, file_path):
         file = open(file_path, 'r')
@@ -88,14 +90,14 @@ class FontesPDF(PdfMaker):
         lines = file.readlines()
         distance_btw_lines = 6.5
         for line in lines:
-            pdf_line = line.strip('\n')
-            self.cell(0, distance_btw_lines, pdf_line, 0, 0.5)
+            self.new_line(line)
  
     @staticmethod
     def build(file_name: str, file_type: str = 'java'):               
-        fontes = FontesPDF(orientation=ALIGN, unit='mm', format='A4')
+        fontes = FontesPDF(orientation=ORIENTATION, unit='mm', format='A4')
         fontes.alias_nb_pages()
         fontes.add_page()
+        fontes.set_auto_page_break(auto=True, margin=15)
         fontes.create_header(HEADER_NAME)
 
         directory = FOLDER_TO_SEARCH_CODE
@@ -107,11 +109,11 @@ class FontesPDF(PdfMaker):
             fontes.create_file_block(str(file))
             
         fontes.create_footer()
-        fontes.output(file_name, 'F')
+        fontes.output(file_name)
 
 SaidaPDF.build()
 FontesPDF.build('./src.pdf', 'java')
-FontesPDF.build('./sql.pdf', 'sql')
+FontesPDF.build('./sql.pdf', 'txt')
 
 files = ['./src.pdf',
         './sql.pdf',
